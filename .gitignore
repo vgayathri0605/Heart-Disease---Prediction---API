@@ -5,5 +5,4 @@ __pycache__/
 .env
 *.pkl
 .DS_Store
-EOF
 notes.md

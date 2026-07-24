@@ -2,7 +2,8 @@
 
 An end-to-end Machine Learning project that predicts whether a patient
 has heart disease based on 13 clinical features. Built with FastAPI,
-containerized with Docker and deployed to AWS EC2 via AWS ECR.
+containerized with Docker, deployed to AWS EC2 via AWS ECR, with a
+CI/CD pipeline and a user-friendly frontend.
 
 ---
 
@@ -18,6 +19,9 @@ a heart disease prediction with confidence score. The model is trained
 on the UCI Heart Disease dataset using Random Forest Classifier
 achieving 84% accuracy.
 
+Includes a frontend designed for both doctors and common users —
+with plain English labels, medical terms, and helpful hints for every field.
+
 ---
 
 ## Tech Stack
@@ -29,22 +33,30 @@ achieving 84% accuracy.
 | Containerization | Docker |
 | Container Registry | AWS ECR |
 | Cloud Server | AWS EC2 (Amazon Linux 2023) |
-| Language | Python 3.12 |
+| CI/CD | GitHub Actions |
+| Frontend | HTML, CSS, Vanilla JavaScript |
+| Language | Python |
 
 ---
 
 ## Project Structure
+
+```
 heart-disease-docker/
 ├── app/
-│   ├── main.py          # FastAPI app and endpoints
+│   ├── main.py          # FastAPI app, endpoints and CORS
 │   ├── model.py         # Model loader and predictor
 │   ├── schemas.py       # Pydantic input/output schemas
 │   └── model.pkl        # Trained Random Forest model
+├── .github/
+│   └── workflows/
+│       └── deploy.yml   # CI/CD pipeline — auto deploy on push
+├── index.html           # Frontend for users and doctors
 ├── train.py             # Model training script
 ├── requirements.txt     # Python dependencies
 ├── Dockerfile           # Docker image instructions
-├── .dockerignore        # Files excluded from Docker
-└── notes.md             # Project notes and documentation
+└── .dockerignore        # Files excluded from Docker
+```
 
 ---
 
@@ -52,7 +64,7 @@ heart-disease-docker/
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | / | Root - API status check |
+| GET | / | Root — API status check |
 | GET | /health | Health check for monitoring |
 | POST | /predict | Heart disease prediction |
 
@@ -103,14 +115,54 @@ heart-disease-docker/
 ```json
 {
   "prediction": 0,
-  "prediction_label": "No Heart Disease",
-  "confidence": 0.85
+  "probability": 0.1200,
+  "result": "No heart disease detected"
 }
 ```
 
 ---
 
-## Run Locally with Docker
+## CI/CD Pipeline
+
+Every push to `main` branch automatically:
+
+1. Checks out code on a free GitHub Ubuntu machine
+2. Logs into AWS using GitHub Secrets
+3. Builds a new Docker image
+4. Tags it with commit SHA and `latest`
+5. Pushes both tags to AWS ECR
+
+GitHub Secrets required:
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_REGION`
+
+---
+
+## Run Locally
+
+```bash
+# Clone the repo
+git clone https://github.com/vgayathri0605/Heart-Disease---Prediction---API.git
+cd Heart-Disease---Prediction---API
+
+# Create virtual environment
+py -m venv venv
+venv\Scripts\activate
+
+# Install dependencies
+py -m pip install -r requirements.txt
+
+# Start API
+py -m uvicorn app.main:app --reload
+
+# Open Swagger UI
+http://127.0.0.1:8000/docs
+```
+
+---
+
+## Run with Docker
 
 ```bash
 # Build image
@@ -125,6 +177,18 @@ http://localhost:8000/docs
 
 ---
 
+## Frontend
+
+Open `index.html` with Live Server in VS Code.
+
+Designed for both audiences:
+- Common users — plain English labels with helpful hints
+- Doctors — medical terms shown beside each label
+
+Shows result with probability percentage and animated risk gauge.
+
+---
+
 ## Dataset
 
 - **Name:** UCI Heart Disease Dataset (Cleveland)
@@ -135,3 +199,15 @@ http://localhost:8000/docs
 - **Accuracy:** 84%
 
 ---
+
+## Author
+
+Gayathri V
+[GitHub](https://github.com/vgayathri0605)
+
+---
+
+## Disclaimer
+
+This tool is for educational and awareness purposes only.
+Always consult a qualified doctor for medical advice.

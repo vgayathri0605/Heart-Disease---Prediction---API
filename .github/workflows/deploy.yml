@@ -3,35 +3,35 @@ name: Deploy to AWS ECR
 on:
   push:
     branches:
-      - main                        # only triggers when you push to main branch
+      - main
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest          # GitHub gives a free Ubuntu machine to run this
+    runs-on: ubuntu-latest
 
     steps:
 
       - name: Checkout code
-        uses: actions/checkout@v3   # clones your repo onto the Ubuntu machine
+        uses: actions/checkout@v4        # updated to v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4   # updated to v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}          # pulls from GitHub secrets
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # pulls from GitHub secrets
-          aws-region: ${{ secrets.AWS_REGION }}                        # pulls from GitHub secrets
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        id: login-ecr                                   # gives this step an ID so next step can reference it
-        uses: aws-actions/amazon-ecr-login@v1           # official AWS action to log into ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2            # updated to v2
 
       - name: Build, tag and push image to ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}  # ECR URL from login step above
-          ECR_REPOSITORY: heart-disease-api                       # your ECR repo name
-          IMAGE_TAG: ${{ github.sha }}                            # unique tag per commit
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: heart-disease-api
+          IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .  # builds Docker image
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG         # pushes to ECR
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest  # tags as latest
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest             # pushes latest tag
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest

@@ -135,6 +135,3 @@ http://localhost:8000/docs
 - **Accuracy:** 84%
 
 ---
-
-## Author
-Built as part of an end-to-end ML engineering portfolio project.

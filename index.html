@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Heart Disease Risk Assessment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f0f2f8; color: #111827; min-height: 100vh; }
+
+    .hero {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%);
+      padding: 40px 24px 56px; text-align: center;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: #c4b5fd; font-size: 11px; font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 99px; margin-bottom: 16px;
+    }
+    .pulse { width: 7px; height: 7px; background: #a78bfa; border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+    .hero h1 { font-family: 'DM Serif Display', serif; font-size: clamp(1.6rem,4vw,2.4rem); color: #fff; line-height: 1.2; margin-bottom: 10px; }
+    .hero h1 em { font-style: italic; color: #c4b5fd; }
+    .hero p { color: #a5b4fc; font-size: 0.88rem; max-width: 400px; margin: 0 auto 24px; line-height: 1.6; }
+    .hero-stats { display: inline-flex; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 28px; gap: 28px; }
+    .stat { text-align: center; }
+    .stat-num { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: #e0e7ff; }
+    .stat-label { font-size: 0.68rem; color: #818cf8; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .stat-div { width: 1px; background: rgba(255,255,255,0.15); }
+
+    .main { max-width: 680px; margin: -24px auto 0; padding: 0 16px 48px; }
+
+    .card { background: #fff; border-radius: 14px; border: 1px solid #e5e7eb; padding: 22px 24px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
+    .card-head {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+      text-transform: uppercase; color: #6366f1;
+      padding-bottom: 12px; margin-bottom: 16px;
+      border-bottom: 1.5px solid #ede9fe;
+    }
+    .card-head svg { width: 15px; height: 15px; stroke: #6366f1; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media(max-width:500px) { .grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 3px; }
+
+    .field-label-row { display: flex; align-items: baseline; gap: 5px; margin-bottom: 2px; }
+    .field-label { font-size: 0.78rem; font-weight: 600; color: #1f2937; }
+    .field-medical { font-size: 0.67rem; color: #9ca3af; font-weight: 400; }
+
+    .field-hint { font-size: 0.71rem; color: #6b7280; line-height: 1.4; margin-bottom: 4px; }
+
+    input, select {
+      font-family: 'Inter', sans-serif; font-size: 0.85rem;
+      padding: 8px 10px; border: 1.5px solid #e5e7eb;
+      border-radius: 8px; background: #fafafa; color: #111827;
+      outline: none; transition: all 0.15s;
+    }
+    input:focus, select:focus { border-color: #6366f1; background: #fff; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .unit { font-size: 0.68rem; color: #9ca3af; }
+
+    .btn {
+      width: 100%; padding: 13px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white; font-family: 'Inter', sans-serif;
+      font-size: 0.92rem; font-weight: 600;
+      border: none; border-radius: 10px; cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:hover { opacity: 0.92; }
+    .btn:active { transform: scale(0.99); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error-box { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; border-radius: 8px; padding: 9px 13px; font-size: 0.8rem; margin-top: 10px; display: none; }
+
+    #result { display: none; margin-top: 12px; }
+
+    .result-banner { border-radius: 10px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .result-banner.low { background: #f0fdf4; border: 1.5px solid #86efac; }
+    .result-banner.high { background: #fef2f2; border: 1.5px solid #fca5a5; }
+    .banner-icon { font-size: 28px; }
+    .banner-title { font-family: 'DM Serif Display', serif; font-size: 1.2rem; }
+    .banner-title.low { color: #16a34a; }
+    .banner-title.high { color: #dc2626; }
+    .banner-sub { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+
+    .gauge-row { display: flex; justify-content: space-between; font-size: 0.7rem; color: #9ca3af; margin-bottom: 6px; }
+    .gauge-track { height: 10px; border-radius: 99px; background: linear-gradient(to right,#16a34a,#facc15,#dc2626); position: relative; margin-bottom: 20px; }
+    .needle { position: absolute; top: 50%; transform: translate(-50%,-50%); width: 20px; height: 20px; background: white; border: 3px solid #1e293b; border-radius: 50%; transition: left 0.9s cubic-bezier(0.34,1.56,0.64,1); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+
+    .prob-center { text-align: center; margin-bottom: 16px; }
+    .prob-pct { font-family: 'DM Serif Display', serif; font-size: 2.8rem; line-height: 1; }
+    .prob-pct.low { color: #16a34a; } .prob-pct.high { color: #dc2626; }
+    .prob-lbl { font-size: 0.75rem; color: #9ca3af; margin-top: 4px; }
+
+    .meta-row { display: flex; justify-content: space-between; font-size: 0.72rem; color: #9ca3af; border-top: 1px solid #f3f4f6; padding-top: 14px; flex-wrap: wrap; gap: 4px; }
+
+    footer { text-align: center; font-size: 0.7rem; color: #9ca3af; padding: 8px 0 32px; }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge"><span class="pulse"></span> AI Clinical Tool</div>
+  <h1>Heart Disease<br/><em>Risk Assessment</em></h1>
+  <p>Answer the questions below to get an instant AI-powered heart disease risk prediction.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">84%</div><div class="stat-label">Accuracy</div></div>
+    <div class="stat-div"></div>
+    <div class="stat"><div class="stat-num">13</div><div class="stat-label">Questions</div></div>
+    <div class="stat-div"></div>
+    <div class="stat"><div class="stat-num">UCI</div><div class="stat-label">Dataset</div></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Demographics -->
+  <div class="card">
+    <div class="card-head">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      About You
+    </div>
+    <div class="grid">
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Your Age</span><span class="field-medical">(age)</span></div>
+        <div class="field-hint">How old are you?</div>
+        <input type="number" id="age" placeholder="e.g. 52"/>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Your Gender</span><span class="field-medical">(sex)</span></div>
+        <div class="field-hint">Your biological sex at birth</div>
+        <select id="sex"><option value="">Select</option><option value="1">Male</option><option value="0">Female</option></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Symptoms -->
+  <div class="card">
+    <div class="card-head">
+      <svg viewBox="0 0 24 24"><path d="M12 21S4 13.5 4 8.5a5 5 0 0 1 8-4 5 5 0 0 1 8 4c0 5-8 12.5-8 12.5z"/></svg>
+      Heart Symptoms
+    </div>
+    <div class="grid">
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Chest Pain Type</span><span class="field-medical">(cp)</span></div>
+        <div class="field-hint">What kind of chest pain do you feel?</div>
+        <select id="cp">
+          <option value="">Select</option>
+          <option value="0">Pain during activity (Typical Angina)</option>
+          <option value="1">Unusual chest discomfort (Atypical Angina)</option>
+          <option value="2">Non-heart related chest pain</option>
+          <option value="3">No chest pain at all</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Heart Electrical Test</span><span class="field-medical">(restecg)</span></div>
+        <div class="field-hint">Result from your ECG / heart tracing test at rest</div>
+        <select id="restecg">
+          <option value="">Select</option>
+          <option value="0">Normal</option>
+          <option value="1">Minor abnormality detected</option>
+          <option value="2">Heart muscle thickening (LVH)</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Chest Pain on Exercise</span><span class="field-medical">(exang)</span></div>
+        <div class="field-hint">Do you get chest pain when you exercise or exert yourself?</div>
+        <select id="exang"><option value="">Select</option><option value="1">Yes</option><option value="0">No</option></select>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Heart Trace Shape</span><span class="field-medical">(slope)</span></div>
+        <div class="field-hint">The shape of your heart's electrical signal during exercise — from your ECG report</div>
+        <select id="slope">
+          <option value="">Select</option>
+          <option value="0">Going up (Upsloping)</option>
+          <option value="1">Flat</option>
+          <option value="2">Going down (Downsloping)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vitals -->
+  <div class="card">
+    <div class="card-head">
+      <svg viewBox="0 0 24 24"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+      Test Results & Vitals
+    </div>
+    <div class="grid">
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Blood Pressure</span><span class="field-medical">(trestbps)</span></div>
+        <div class="field-hint">Your resting blood pressure reading</div>
+        <input type="number" id="trestbps" placeholder="e.g. 130"/>
+        <span class="unit">mm Hg</span>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Cholesterol Level</span><span class="field-medical">(chol)</span></div>
+        <div class="field-hint">Total cholesterol from your blood test</div>
+        <input type="number" id="chol" placeholder="e.g. 250"/>
+        <span class="unit">mg/dl</span>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">High Blood Sugar?</span><span class="field-medical">(fbs)</span></div>
+        <div class="field-hint">Is your fasting blood sugar above 120 mg/dl?</div>
+        <select id="fbs"><option value="">Select</option><option value="1">Yes</option><option value="0">No</option></select>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Max Heart Rate</span><span class="field-medical">(thalach)</span></div>
+        <div class="field-hint">Highest heart rate reached during exercise test</div>
+        <input type="number" id="thalach" placeholder="e.g. 150"/>
+        <span class="unit">bpm</span>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Heart Stress Score</span><span class="field-medical">(oldpeak)</span></div>
+        <div class="field-hint">ST depression value from your exercise ECG report</div>
+        <input type="number" id="oldpeak" placeholder="e.g. 1.5" step="0.1"/>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Blocked Heart Vessels</span><span class="field-medical">(ca)</span></div>
+        <div class="field-hint">Number of major blood vessels with blockage — from angiogram report</div>
+        <select id="ca"><option value="">Select</option><option value="0">0 — None blocked</option><option value="1">1 vessel blocked</option><option value="2">2 vessels blocked</option><option value="3">3 vessels blocked</option></select>
+      </div>
+      <div class="field">
+        <div class="field-label-row"><span class="field-label">Blood Disorder</span><span class="field-medical">(thal)</span></div>
+        <div class="field-hint">Thalassemia status — check your blood disorder report</div>
+        <select id="thal">
+          <option value="">Select</option>
+          <option value="1">No disorder (Normal)</option>
+          <option value="2">Fixed defect — permanent damage</option>
+          <option value="3">Reversible defect — temporary issue</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" id="predictBtn" onclick="predict()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21S4 13.5 4 8.5a5 5 0 0 1 8-4 5 5 0 0 1 8 4c0 5-8 12.5-8 12.5z"/></svg>
+    Check My Heart Risk
+  </button>
+  <div class="error-box" id="errBox"></div>
+
+  <div class="card" id="result">
+    <div class="card-head">
+      <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Your Result
+    </div>
+    <div class="result-banner" id="banner">
+      <div class="banner-icon" id="bIcon"></div>
+      <div><div class="banner-title" id="bTitle"></div><div class="banner-sub" id="bSub"></div></div>
+    </div>
+    <div class="gauge-row"><span>Low Risk</span><span>Moderate</span><span>High Risk</span></div>
+    <div class="gauge-track"><div class="needle" id="needle"></div></div>
+    <div class="prob-center">
+      <div class="prob-pct" id="probPct"></div>
+      <div class="prob-lbl">Probability of Heart Disease</div>
+    </div>
+    <div class="meta-row"><span>Model: Random Forest</span><span>Accuracy: 84%</span><span>Dataset: UCI</span></div>
+  </div>
+
+  <footer>This tool is for awareness only — always consult a doctor for medical advice.</footer>
+</div>
+
+<script>
+  const API = "http://127.0.0.1:8000";
+  async function predict() {
+    const btn = document.getElementById("predictBtn");
+    const err = document.getElementById("errBox");
+    err.style.display = "none";
+    const ids = ["age","sex","cp","trestbps","chol","fbs","restecg","thalach","exang","oldpeak","slope","ca","thal"];
+    const body = {};
+    for (const id of ids) {
+      const v = document.getElementById(id).value;
+      if (v === "") { err.textContent = `Please fill all fields — missing: ${id}`; err.style.display = "block"; return; }
+      body[id] = parseFloat(v);
+    }
+    btn.disabled = true; btn.textContent = "Checking…";
+    try {
+      const res = await fetch(`${API}/predict`, { method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error();
+      showResult(await res.json());
+    } catch {
+      err.textContent = "Cannot connect to API. Make sure the server is running.";
+      err.style.display = "block";
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 21S4 13.5 4 8.5a5 5 0 0 1 8-4 5 5 0 0 1 8 4c0 5-8 12.5-8 12.5z"/></svg> Check My Heart Risk';
+    }
+  }
+  function showResult(json) {
+    const high = json.prediction === 1;
+    const pct = Math.round(json.probability * 100);
+    const cls = high ? "high" : "low";
+    document.getElementById("banner").className = "result-banner " + cls;
+    document.getElementById("bIcon").textContent = high ? "⚠️" : "✅";
+    document.getElementById("bTitle").textContent = json.result;
+    document.getElementById("bTitle").className = "banner-title " + cls;
+    document.getElementById("bSub").textContent = `Risk score: ${pct}% — ${high ? "Please consult a doctor." : "Keep maintaining a healthy lifestyle!"}`;
+    document.getElementById("probPct").textContent = `${pct}%`;
+    document.getElementById("probPct").className = "prob-pct " + cls;
+    document.getElementById("needle").style.left = `${pct}%`;
+    const r = document.getElementById("result");
+    r.style.display = "block";
+    r.scrollIntoView({ behavior: "smooth" });
+  }
+</script>
+</body>
+</html>

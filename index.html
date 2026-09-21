@@ -295,11 +295,11 @@
   }
   function showResult(json) {
     const high = json.prediction === 1;
-    const pct = Math.round(json.probability * 100);
+    const pct = Math.round(json.confidence * 100);
     const cls = high ? "high" : "low";
     document.getElementById("banner").className = "result-banner " + cls;
     document.getElementById("bIcon").textContent = high ? "⚠️" : "✅";
-    document.getElementById("bTitle").textContent = json.result;
+    document.getElementById("bTitle").textContent = json.prediction_label;
     document.getElementById("bTitle").className = "banner-title " + cls;
     document.getElementById("bSub").textContent = `Risk score: ${pct}% — ${high ? "Please consult a doctor." : "Keep maintaining a healthy lifestyle!"}`;
     document.getElementById("probPct").textContent = `${pct}%`;
